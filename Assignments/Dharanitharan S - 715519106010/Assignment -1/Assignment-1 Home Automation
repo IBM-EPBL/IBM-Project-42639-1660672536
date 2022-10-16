@@ -1,0 +1,75 @@
+///PIR sensor senses the movement and gives the input  to bulb to glow
+///Ultrasonic sensor to sensor the distance to open and close the door
+///Temperature sensor senses the value if exceeds the threshold will enable the buzzer
+
+
+#include <Servo.h>
+int dist = 0;
+
+int baselineTemp = 40;
+float celsius = 0;
+float fahrenheit = 0;
+
+long readUltrasonicDistance(int triggerPin, int echoPin)
+{
+  pinMode(triggerPin, OUTPUT);  
+  digitalWrite(triggerPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(triggerPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(triggerPin, LOW);
+  pinMode(echoPin, INPUT);
+  return pulseIn(echoPin, HIGH);
+}
+
+Servo servo_8;
+
+void setup()
+{
+  servo_8.attach(8, 500, 2500);
+  pinMode(2, INPUT);
+  pinMode(12, OUTPUT);
+  pinMode(A0, INPUT);
+  pinMode(9, OUTPUT);
+}
+
+void loop()
+{
+  dist = 0.01723 * readUltrasonicDistance(7, 7);
+  if (dist <= 100) {
+    servo_8.write(90);
+    delay(1000); 
+  } else {
+    servo_8.write(0);
+    delay(1000); 
+  }
+  if (digitalRead(2) == 1) {
+    digitalWrite(12, HIGH);
+    delay(1000); 
+  } else {
+    digitalWrite(12, LOW);
+    delay(1000);
+  }
+  
+  
+  baselineTemp = 50;
+  
+  int read = analogRead(A0);
+  float voltage = (read*5);
+  voltage = voltage/1024;
+  celsius = (voltage-0.5)*100;
+  fahrenheit = ((celsius * 9) / 5 + 32);
+  
+  
+  if (celsius > baselineTemp) {
+    tone(9, 880);
+  }
+  else {
+    noTone(9);
+  }
+  delay(1000);
+  
+}
+
+
+https://www.tinkercad.com/things/7FY6JWoiv2V?sharecode=5r3qWzdveBWlrUv-wH9jtR-sEL8WXBJf3M_DpB-IrgM
